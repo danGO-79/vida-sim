@@ -1,0 +1,29 @@
+{
+  "name": "vida",
+  "version": "0.6.0",
+  "private": true,
+  "description": "Organismo Digital Contemplativo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/desktop",
+    "build": "npm run build -w apps/desktop",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --passWithNoTests",
+    "generate-icons": "npm run generate-icons -w apps/desktop",
+    "package": "npm run package -w apps/desktop",
+    "package:mac": "npm run package:mac -w apps/desktop",
+    "package:win": "npm run package:win -w apps/desktop",
+    "package:linux": "npm run package:linux -w apps/desktop"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.0.0",
+    "electron-builder": "^26.8.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.7.0"
+  }
+}
