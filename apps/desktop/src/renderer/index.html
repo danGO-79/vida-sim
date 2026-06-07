@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=500, height=400" />
+  <title>Vida</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; user-select: none; }
+    #app { width: 100%; height: 100%; position: relative; }
+    #app canvas { display: block; }
+
+    #drag-region {
+      position: absolute; top: 0; left: 40px; width: calc(100% - 40px); height: 24px;
+      -webkit-app-region: drag; z-index: 10;
+    }
+
+    #min-btn {
+      position: absolute; top: 5px; left: 6px; z-index: 15;
+      pointer-events: auto; cursor: pointer;
+      width: 13px; height: 13px; border-radius: 50%;
+      border: none; background: #ffbd2e;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(0,0,0,0.45); font-size: 9px; line-height: 1;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      transition: filter 0.15s;
+    }
+    #min-btn:hover { filter: brightness(1.2); }
+    #min-btn:active { filter: brightness(0.9); }
+
+    #toggle-sidebar-btn {
+      position: absolute; top: 5px; left: 23px; z-index: 15;
+      pointer-events: auto; cursor: pointer;
+      width: 13px; height: 13px; border-radius: 50%;
+      border: none; background: rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.45); font-size: 7px; line-height: 1;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    #toggle-sidebar-btn:hover { background: rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); }
+    #toggle-sidebar-btn:active { background: rgba(255,255,255,0.08); }
+
+    #sidebar {
+      position: absolute; top: 0; right: 0; width: 100px; height: 100%;
+      background: rgba(0,0,0,0.35);
+      display: flex; flex-direction: column; z-index: 5;
+      pointer-events: none;
+    }
+
+    #sidebar-content {
+      flex: 1;
+      padding: 4px 6px 4px;
+      overflow: hidden;
+    }
+
+    #sidebar {
+      position: absolute; top: 0; right: 0; width: 100px; height: 100%;
+      background: rgba(0,0,0,0.35);
+      display: flex; flex-direction: column; z-index: 5;
+      pointer-events: none;
+    }
+    .sidebar-group {
+      font-size: 10px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .sidebar-group div {
+      pointer-events: auto;
+    }
+    .indicator.up { color: rgba(100,255,100,0.7); }
+    .indicator.down { color: rgba(255,80,80,0.7); }
+
+    .sidebar-sep {
+      border: none; border-top: 1px solid rgba(255,255,255,0.12);
+      margin: 4px 0;
+    }
+
+    #sidebar-buttons {
+      padding: 2px 6px 4px;
+      display: flex; flex-direction: column; gap: 4px;
+      pointer-events: auto;
+    }
+
+    #sidebar-buttons .vida-btn {
+      width: 100%; font-size: 10px;
+      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.18); border-radius: 3px;
+      padding: 3px 0; cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s;
+      text-align: center;
+    }
+    #sidebar-buttons .vida-btn:hover { background: rgba(255,255,255,0.25); color: rgba(255,255,255,0.95); }
+
+    #sidebar-buttons .btn-danger {
+      background: rgba(200,50,50,0.2); color: rgba(255,100,100,0.7);
+      border-color: rgba(200,50,50,0.3);
+    }
+    #sidebar-buttons .btn-danger:hover { background: rgba(200,50,50,0.35); color: rgba(255,100,100,0.9); }
+
+    .modal-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); display: none; z-index: 20;
+      pointer-events: auto;
+    }
+    .modal-overlay.open { display: block; }
+
+    .modal-content {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 90%; max-height: 80%; background: rgba(20,20,30,0.95);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+      padding: 12px; overflow-y: auto; color: rgba(255,255,255,0.8);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 10px; line-height: 1.6;
+    }
+    .modal-content h2 {
+      font-size: 11px; font-weight: 400; letter-spacing: 2px;
+      text-transform: uppercase; opacity: 0.6; margin: 0;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .modal-close {
+      cursor: pointer; opacity: 0.5; font-size: 14px; background: none; border: none;
+      color: rgba(255,255,255,0.6); padding: 0 2px; line-height: 1;
+    }
+    .modal-close:hover { opacity: 1; }
+
+    .history-entry {
+      display: flex; gap: 8px; padding: 3px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .history-day { opacity: 0.4; min-width: 40px; }
+    .history-text { flex: 1; }
+
+    .summary-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+      margin-bottom: 12px; font-size: 10px;
+    }
+    .summary-label { opacity: 0.5; }
+    .summary-value { text-align: right; }
+
+    .btn-row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+    .btn-row button {
+      padding: 4px 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
+      cursor: pointer; font-size: 10px; pointer-events: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .btn-row button:hover { background: rgba(255,255,255,0.15); }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="drag-region"></div>
+
+    <button id="min-btn">−</button>
+    <button id="toggle-sidebar-btn">◀</button>
+
+    <div id="sidebar">
+      <div id="sidebar-content"></div>
+      <div id="sidebar-buttons">
+        <button id="history-btn" class="vida-btn">⏱ Historial</button>
+        <button id="reset-btn" class="vida-btn">⟳ Reset</button>
+        <button id="save-btn" class="vida-btn">💾 Guardar</button>
+        <span id="save-feedback" style="font-size:9px;color:rgba(255,255,255,0.4);text-align:center;opacity:0;transition:opacity 0.3s">✓ Guardado</span>
+        <button id="quit-btn" class="vida-btn" style="margin-top:auto;border-color:rgba(255,255,255,0.08);opacity:0.5;font-size:9px">Salir</button>
+      </div>
+    </div>
+
+    <div id="history-modal" class="modal-overlay" data-close>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Historial</h2>
+          <button class="modal-close" id="history-close">✕</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+    <div id="reset-modal" class="modal-overlay">
+      <div class="modal-content">
+        <h2>¿Reiniciar ecosistema?</h2>
+        <p style="margin-bottom:8px;opacity:0.6;">
+          Se generará una nueva planta con genética única.
+          Esta acción no puede deshacerse.
+        </p>
+        <div id="reset-summary"></div>
+        <div class="btn-row">
+          <button id="reset-cancel">Cancelar</button>
+          <button id="reset-confirm" class="btn-danger">⟳ Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

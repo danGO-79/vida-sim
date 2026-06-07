@@ -1,0 +1,40 @@
+{
+  "name": "@vida/desktop",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "main": "./out/main/index.js",
+  "author": "Vida Project",
+  "description": "Organismo Digital Contemplativo",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "prebuild": "npm run generate-icons",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit",
+    "prepackage": "npm run generate-icons",
+    "package": "electron-vite build && electron-builder --config electron-builder.config.js",
+    "prepackage:mac": "npm run generate-icons",
+    "package:mac": "electron-vite build && electron-builder --config electron-builder.config.js --mac",
+    "prepackage:win": "npm run generate-icons",
+    "package:win": "electron-vite build && electron-builder --config electron-builder.config.js --win",
+    "prepackage:linux": "npm run generate-icons",
+    "package:linux": "electron-vite build && electron-builder --config electron-builder.config.js --linux"
+  },
+  "dependencies": {
+    "@vida/simulation-engine": "*",
+    "@vida/genetics-engine": "*",
+    "@vida/environment-engine": "*",
+    "@vida/ecosystem-engine": "*",
+    "@vida/rendering-engine": "*",
+    "@vida/persistence-engine": "*",
+    "@vida/ui-engine": "*"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-vite": "^2.3.0",
+    "electron-builder": "26.8.1",
+    "@types/node": "^22.0.0"
+  }
+}
